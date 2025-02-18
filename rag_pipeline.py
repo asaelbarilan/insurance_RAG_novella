@@ -119,15 +119,24 @@ class RAGPipeline:
         print(f"[INFO] Loaded {len(documents)} Documents from JSON.")
         return documents
 
+    # def load_and_chunk_docs(self) -> List[Document]:
+    #     """
+    #     1. Load docs from JSON
+    #     2. Chunk them into smaller pieces
+    #     """
+    #     docs = self.load_json_as_documents()
+    #     # Now chunk them
+    #     chunked_docs = chunk_documents_with_metadata(docs)
+    #     return chunked_docs
+
     def load_and_chunk_docs(self) -> List[Document]:
         """
-        1. Load docs from JSON
-        2. Chunk them into smaller pieces
+        Load JSON, but do NOT chunk them further—each carrier = 1 Document.
         """
-        docs = self.load_json_as_documents()
-        # Now chunk them
-        chunked_docs = chunk_documents_with_metadata(docs)
-        return chunked_docs
+        docs = self.load_json_as_documents()  # returns one Document per carrier
+        # Skip the text splitter entirely, or chunk at a large size
+        # If you REALLY want chunking, choose large chunk_size (e.g. 2000+).
+        return docs
 
     def create_vector_db(self):
         """
@@ -178,17 +187,17 @@ class RAGPipeline:
         else:
             raise RuntimeError(f"[ERROR] Ollama call failed: {response.status_code} {response.text}")
 
-    def ask_openai(self, prompt: str, model_name: str = "gpt-3.5-turbo") -> str:
+    def ask_openai(self, prompt: str, model_name: str = "gpt-4o") -> str:
         """
         Query OpenAI ChatCompletion (GPT-3.5/4).
         """
         print(f"[DEBUG] Sending prompt to OpenAI with model={model_name}")
-        response = openai.ChatCompletion.create(
+        response = openai.chat.completions.create(
             model=model_name,
             messages=[{"role": "user", "content": prompt}],
             temperature=0.0
         )
-        return response["choices"][0]["message"]["content"]
+        return response.choices[0].message.content
 
     def ask_huggingface(self, prompt: str) -> str:
         """
@@ -209,29 +218,24 @@ class RAGPipeline:
         else:
             raise ValueError(f"[ERROR] Unknown LLM type: {llm}")
 
-    def answer_question(self, question: str, llm: str = "ollama", top_k: int = 3):
-        """
-        Retrieve top-k docs from the vector DB, build a prompt, and get an LLM-based answer.
 
-        :return: (answer string, List of retrieved Documents)
-        """
+
+    def answer_question(self, question: str, llm: str = "ollama", top_k: int = 5):
         if not self.vector_db:
-            print("[INFO] Vector DB not loaded. Attempting to load from disk...")
             self.load_vector_db()
             if not self.vector_db:
                 return "[ERROR] No vector DB available.", []
 
-        # Retrieve relevant docs
         retriever = self.vector_db.as_retriever(search_kwargs={"k": top_k})
         relevant_docs = retriever.get_relevant_documents(question)
-        print(f"[INFO] Retrieved {len(relevant_docs)} relevant chunks.")
 
-        # Build context block
         context_blocks = []
         for doc in relevant_docs:
-            carrier = doc.metadata.get("carrier_name", "UnknownCarrier")
+            carrier = doc.metadata.get("carrier_name", "Unknown Carrier")
+            chunk_idx = doc.metadata.get("chunk_index", "N/A")
             snippet = (
                 f"Carrier: {carrier}\n"
+                f"Chunk index: {chunk_idx}\n"
                 f"{doc.page_content}\n"
                 "---------\n"
             )
@@ -239,20 +243,19 @@ class RAGPipeline:
 
         combined_context = "\n".join(context_blocks)
 
-        # Final prompt
-        prompt = f"""You are a helpful assistant. Please provide your answer in clear, coherent sentences. 
-        Ensure proper spacing, punctuation, and Markdown formatting.
-
-        Context:
-        {combined_context}
-
-        Question: {question}
-
-        Answer:
-        """
-
+        prompt = f"""You are a helpful assistant for insurance brokers.
+                        Use the context below (multiple carriers) 
+                        to identify every carrier that provides coverage in Arizona. 
+                        Make sure to list them all individually.
+                        If unsure, say "I don't know."
+                        Context:
+                        {combined_context}
+                    
+                        Question: {question}
+                    
+                        Answer (in well-formatted text):
+                        """
         answer = self.ask_llm(prompt, llm=llm).strip()
-
         return answer, relevant_docs
 
 

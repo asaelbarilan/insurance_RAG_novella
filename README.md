@@ -32,8 +32,8 @@ stores embeddings in a vector database, and uses an LLM to generate answers base
 
 2.activate:
 	-put guide_novella.json in data folder
-	-run from folder in cmd streamlit run app.py
-
+	-run app UI in cmd (from folder): streamlit run app.py
+	-run tests: python -m unittest tests/test_rag.py
 
 **notes:**
 	-Initialize (create DB) vs. Load (use existing DB) is about whether you’re building new embeddings or re-using what’s 		already built.

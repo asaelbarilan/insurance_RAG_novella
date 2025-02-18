@@ -6,4 +6,4 @@ sentence-transformers
 pypdf
 streamlit
 transformers
-accelerate 
+accelerate
