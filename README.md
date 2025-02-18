@@ -84,3 +84,7 @@ Break down the LLM’s reasoning steps (e.g., parse coverage states first, then 
 - **tests**
 Broaden your set of known Q&A pairs
 
+- **one shot learning**
+add one shot to prompts so the model would understand better how to search for the question.
+
+
