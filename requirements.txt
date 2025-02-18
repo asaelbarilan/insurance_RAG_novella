@@ -1,0 +1,9 @@
+langchain
+openai
+requests
+chromadb
+sentence-transformers
+pypdf
+streamlit
+transformers
+accelerate 

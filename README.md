@@ -29,3 +29,12 @@ stores embeddings in a vector database, and uses an LLM to generate answers base
    ```bash
    git clone https://github.com/asaelbarilan/insurance_RAG_novella.git
    cd insurance_RAG_novella
+
+2.activate:
+	-put guide_novella.json in data folder
+	-run from folder in cmd streamlit run app.py
+
+
+**notes:**
+	-Initialize (create DB) vs. Load (use existing DB) is about whether you’re building new embeddings or re-using what’s 		already built.
+	-The chunk slider during queries is about how many results come back from the existing database—not the original text-	splitting chunk size.

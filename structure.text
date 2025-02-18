@@ -1,0 +1,12 @@
+rag-insurance/
+│
+├── data/
+│   └── [Place your PDF appetite guides here]
+│
+├── tests/
+│   └── test_rag.py               # Basic test suite
+│
+├── rag_pipeline.py                # Core ingestion + retrieval + LLM pipeline
+├── app.py                         # Simple Streamlit or CLI-based app
+├── README.md                      # Setup instructions, usage, design notes
+└── requirements.txt               # Python dependencies
