@@ -31,9 +31,11 @@ stores embeddings in a vector database, and uses an LLM to generate answers base
    cd insurance_RAG_novella
 
 2. **activate**:
-   -put guide_novella.json in data folder
-   -run app UI in cmd (from folder): streamlit run app.py
-   -run tests: python -m unittest tests/test_rag.py
+   - put guide_novella.json in data folder
+   - run app UI in cmd (from folder): streamlit run app.py
+   - run tests: python -m unittest tests/test_rag.py
 3. **notes:**
-   -Initialize (create DB) vs. Load (use existing DB) is about whether you’re building new embeddings or re-using what’s 		already built.
-   -The chunk slider during queries is about how many results come back from the existing database—not the original text-	splitting chunk size.
+   - Initialize (create DB) vs. Load (use existing DB) is about whether you’re building new embeddings or re-using what’s 		already built.
+   - The chunk slider during queries is about how many results come back from the existing database—not the original text-	splitting chunk size.
+
+
