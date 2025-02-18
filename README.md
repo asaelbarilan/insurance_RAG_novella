@@ -28,4 +28,4 @@ stores embeddings in a vector database, and uses an LLM to generate answers base
 
    ```bash
    git clone https://github.com/asaelbarilan/insurance_RAG_novella.git
-   cd rag-insurance
+   cd insurance_RAG_novella
