@@ -63,17 +63,24 @@ stores embeddings in a vector database, and uses an LLM to generate answers base
 
 ---
 
-## Known Limitations
+## Known Limitations + future work
 
 
 - **Hallucination Risk**  
-  The LLM can generate text not supported by any retrieved source. Verification is recommended.
+  The LLM can generate text not supported by any retrieved source- add second prompt for verification 
 
 - **Lack of Full Structured Metadata**  
-  We rely on text embeddings; for precise coverage details, consider storing explicit metadata fields. 
-meta data and normalization may help. 
+  meta data and normalization may help. storing explicit metadata fields. 
+
 
 - **Model & Rate Limits**  
   If using OpenAI, you can hit rate/usage limits; local models require adequate hardware resources.
-but small local models can be less smart.
+but small local models can be "less smart".
+
+ 
+- **Adopt Chain-of-Thought**
+Break down the LLM’s reasoning steps (e.g., parse coverage states first, then generate the final answer).  
+
+- **tests**
+Broaden your set of known Q&A pairs
 
