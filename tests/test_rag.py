@@ -5,27 +5,20 @@ from rag_pipeline import RAGPipeline
 
 # "Gold standard" answers in the form:
 #    question_string: [list_of_expected_carriers]
-# taken with gpt O1
-
 gold_answers = {
     "Which carriers provide coverage in Arizona?": [
         "Lynx", "Moxie", "Semsee", "Convex", "Denali"
     ],
     "Which carrier can write a premium of 5,000 USD or lower ?": [
-        # $2,500 min => Moxie
-        # $5,000 min => Lynx
         "Moxie", "Lynx"
     ],
     "Which carrier can handle a business of type Vacant?": [
-        # Lynx, Semsee, Convex, Denali each mention "Vacant"
         "Lynx", "Semsee", "Convex", "Denali"
     ],
     "Find carriers that write apartment buildings with limits over $10M": [
         "Lynx", "Moxie", "Convex"
     ],
     "Which carriers would consider a $20M TIV warehouse in Arizona?": [
-        # Convex is the best fit for full coverage
-        # Lynx can do partial up to $15M ground-up, or $10M primary if layering
         "Convex", "Lynx"
     ]
 }
@@ -34,27 +27,32 @@ gold_answers = {
 class TestRAGValidationSet(unittest.TestCase):
     def setUp(self):
         """
-        1. Reads the environment variable LLM_CHOICE (optional).
-        2. Instantiates a RAGPipeline pointing to the JSON data.
-        3. Creates or loads the Chroma DB.
+        Sets up the pipeline by constructing an absolute path to guide_novella.json
+        and either creating or loading the Chroma DB. Also defines self.llm to avoid errors.
         """
-        # Read environment variable or default to "ollama"
-        self.llm_choice = os.environ.get("LLM_CHOICE", "ollama")
-        print(f"[INFO] Using LLM backend: {self.llm_choice}")
+        # Derive project root from the location of this test file
+        project_root = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..")
+        )
+        json_path = os.path.join(project_root, "data", "guide_novella.json")
 
-        # Initialize pipeline with JSON-based ingestion
+        # Debug print to confirm the path
+        print(f"[DEBUG] Using JSON path => {json_path}")
+
+        # Instantiate RAGPipeline with an absolute path
         self.pipeline = RAGPipeline(
-            json_path="./data/guide_novella.json",  # Adjust path if needed
-            vector_db_path="./chroma_db",
-            openai_api_key=None
+            json_path=json_path,
+            vector_db_path=os.path.join(project_root, "chroma_db")
         )
 
-        # If there's no existing Chroma index, create it
-        if not os.path.exists("./chroma_db/index"):
-            print("[INFO] Creating fresh vector DB...")
+        # Define the LLM backend for all tests (e.g., "ollama", "openai", or "hf")
+        self.llm = "ollama"
+
+        # Create or load DB
+        chroma_index_path = os.path.join(project_root, "chroma_db", "index")
+        if not os.path.exists(chroma_index_path):
             self.pipeline.create_vector_db()
         else:
-            print("[INFO] Loading existing vector DB...")
             self.pipeline.load_vector_db()
 
     def test_validation_set(self):
@@ -66,15 +64,15 @@ class TestRAGValidationSet(unittest.TestCase):
             print(f"\n[TEST] Question: {question}")
             answer, docs = self.pipeline.answer_question(
                 question=question,
-                llm=self.llm_choice,
-                top_k=5
+                llm=self.llm,  # uses the LLM we set in setUp()
+                top_k=5        # if your pipeline supports a 'top_k' parameter
             )
             print(f"LLM Answer:\n{answer}\n")
 
             # Basic check: we got some answer
             self.assertIsNotNone(answer, "LLM returned no answer.")
 
-            # Simple string matching for each expected carrier name
+            # Simple string matching for each expected carrier
             normalized_answer = answer.lower()
             for carrier in expected_carriers:
                 carrier_lower = carrier.lower()
