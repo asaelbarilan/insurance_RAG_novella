@@ -27,5 +27,5 @@ stores embeddings in a vector database, and uses an LLM to generate answers base
 1. **Clone the repo**:
 
    ```bash
-   git clone https://github.com/yourusername/rag-insurance.git
+   git clone https://github.com/asaelbarilan/insurance_RAG_novella.git
    cd rag-insurance
