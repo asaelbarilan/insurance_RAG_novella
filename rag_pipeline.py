@@ -213,8 +213,8 @@ class RAGPipeline:
             return self.ask_ollama(prompt)
         elif llm == "openai":
             return self.ask_openai(prompt)
-        elif llm == "hf":
-            return self.ask_huggingface(prompt)
+        # elif llm == "hf":
+        #     return self.ask_huggingface(prompt)
         else:
             raise ValueError(f"[ERROR] Unknown LLM type: {llm}")
 

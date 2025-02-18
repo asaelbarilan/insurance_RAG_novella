@@ -33,9 +33,47 @@ stores embeddings in a vector database, and uses an LLM to generate answers base
 2. **activate**:
    - put guide_novella.json in data folder
    - run app UI in cmd (from folder): streamlit run app.py
+	- if using open ai put key inside UI ( its single use and wont be saved)
+	- to run local model I used ollama with llama 3.1 8b params, the model need to be downloaded first
    - run tests: python -m unittest tests/test_rag.py
-3. **notes:**
-   - Initialize (create DB) vs. Load (use existing DB) is about whether you’re building new embeddings or re-using what’s 		already built.
-   - The chunk slider during queries is about how many results come back from the existing database—not the original text-	splitting chunk size.
 
+3. **notes:**
+   - Initialize (create DB) vs. Load (use existing DB) is about whether you’re building new embeddings or re-using what’s already built.
+   - The chunk slider during queries is about how many results come back from the existing database—not the original text-splitting chunk size.
+
+## Design Decisions
+
+### Chroma as Vector Store
+- We use Chroma for persistent storage of embeddings.
+- Chroma is open-source and integrates easily with LangChain.
+
+### Embeddings
+- By default, the system uses a HuggingFace model (e.g., `sentence-transformers/all-MiniLM-L6-v2`).
+- This model is lightweight and offers reasonable performance for short texts.
+
+### LLM Backends
+- **Local** via Ollama for Llama-based models for saving money on unnecessary calls. 
+- **OpenAI** (GPT-3.5/GPT-4) if you provide an API key.
+- **Optional placeholders** for Hugging Face local pipelines, Anthropic (Claude), etc. for future use
+
+- **Chunking & Retrieval** Fine-tuned chunk sizes and adjusted “top_k” retrieval to ensure the relevant carriers aren’t missed.
+- **Prompt Engineering** Improved prompt instructions to list all matching carriers, not just the first.
+- **chunks** chunks are in json per carrier
+- **testing** created the answers to relevant questions with O1 
+
+---
+
+## Known Limitations
+
+
+- **Hallucination Risk**  
+  The LLM can generate text not supported by any retrieved source. Verification is recommended.
+
+- **Lack of Full Structured Metadata**  
+  We rely on text embeddings; for precise coverage details, consider storing explicit metadata fields. 
+meta data and normalization may help. 
+
+- **Model & Rate Limits**  
+  If using OpenAI, you can hit rate/usage limits; local models require adequate hardware resources.
+but small local models can be less smart.
 
